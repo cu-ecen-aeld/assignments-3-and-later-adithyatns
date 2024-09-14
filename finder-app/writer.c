@@ -7,7 +7,7 @@ int main(int argc, char** argv) {
 	int i,len;
 	FILE *fp;
 	const char *pathname, *mode;
-	printf("the count of arguments %d\n", argc);
+	//printf("the count of arguments %d\n", argc);
 	//for (i=0;i<argc;i++) printf("the arguments passed %s\n",argv[i]);
 	
 	pathname = argv[1];
@@ -20,8 +20,8 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 
-	len = fwrite(argv[2], sizeof(char),strlen(argv[1]),fp) ;
-	if (len != strlen(argv[1]))
+	len = fwrite(argv[2], sizeof(char),strlen(argv[1])+1,fp) ;
+	if (len != strlen(argv[1])+1)
 		printf("write failed\n");
 
 	fclose(fp);
