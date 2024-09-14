@@ -20,7 +20,7 @@ else
   echo "directory ${filesdir} does not exist"
   exit 1
 fi
-Y=$(grep ${searchstr} -r ${filesdir} | wc -l)
+Y=$(grep -a ${searchstr} -r ${filesdir} | wc -l)
 X=$(find ${filesdir} -type f| wc -l)
 
   echo "The number of files are ${X} and the number of matching lines are ${Y}" 
