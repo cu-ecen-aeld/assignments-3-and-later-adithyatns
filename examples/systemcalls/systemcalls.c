@@ -17,6 +17,12 @@ bool do_system(const char *cmd)
  *   or false() if it returned a failure
 */
 
+	printf("command execution with command: %s\n", cmd);
+	if(system(cmd)== -1){
+		printf("command execution failedwith command: %s\n", cmd);
+		return false;
+	}
+
     return true;
 }
 
@@ -39,16 +45,19 @@ bool do_exec(int count, ...)
     va_list args;
     va_start(args, count);
     char * command[count+1];
-    int i;
+    char *pathname;
+   
+    int i,ret=0, wstat;
+    pid_t pid;
     for(i=0; i<count; i++)
     {
         command[i] = va_arg(args, char *);
+		printf(" command: %s\n", command[i]);
+			
     }
-    command[count] = NULL;
-    // this line is to avoid a compile warning before your implementation is complete
-    // and may be removed
-    command[count] = command[count];
-
+   
+		pathname = command[0];
+		command[count]= (char *)0;
 /*
  * TODO:
  *   Execute a system command by calling fork, execv(),
@@ -58,8 +67,31 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
+    pid = fork();
+    if(pid == -1)
+    	return false;
+    else if(pid == 0){
+    	printf("this is child process %s \n", pathname);
+		ret = execv(command[0], command);
+		if (ret == -1) {
+			perror("Exec ");
+			printf("Error %d", errno);
+			return false;
+			}	
+	}
 
     va_end(args);
+    if(waitpid(pid, &wstat, 0) == -1)
+    	{return false;}
+    
+	if ( WIFEXITED(wstat) )
+    {
+        int exit_status = WEXITSTATUS(wstat);        
+        printf("Exit status of the child was %d\n", 
+                                     exit_status);
+        if (exit_status != 0)
+        	return false;
+   	}
 
     return true;
 }
@@ -74,26 +106,44 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     va_list args;
     va_start(args, count);
     char * command[count+1];
-    int i;
+    int i, ret,wstat;
+    pid_t pid;
     for(i=0; i<count; i++)
     {
         command[i] = va_arg(args, char *);
+	printf("command: %s\n", command[i]);
     }
-    command[count] = NULL;
-    // this line is to avoid a compile warning before your implementation is complete
-    // and may be removed
-    command[count] = command[count];
-
-
+    
+	command[count] = (char *)0;
 /*
- * TODO
+ * TODO:q
  *   Call execv, but first using https://stackoverflow.com/a/13784315/1446624 as a refernce,
  *   redirect standard out to a file specified by outputfile.
  *   The rest of the behaviour is same as do_exec()
  *
 */
+	int fd = open(outputfile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
+	if (fd < 0) { perror("open"); abort(); }
+    pid = fork();
+    if(pid == -1)
+    	return false;
+    else if(pid == 0){
+    	if (dup2(fd, 1) < 0) { perror("dup2"); abort(); }
+    	//printf("this is child process\n");
+		ret = execvp(command[0], command);
+		if (ret == -1) {
+			perror("Exec ");
+			printf("Error %d", errno);
+			return false;
+			}
+		
+	}
+   
+    if(waitpid(pid, &wstat, 0) == -1)
+    	return false;
 
     va_end(args);
-
+	close(fd);
     return true;
+    
 }
