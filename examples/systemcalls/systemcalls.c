@@ -55,8 +55,10 @@ bool do_exec(int count, ...)
 		printf(" command: %s\n", command[i]);
 			
     }
-   
 		pathname = command[0];
+	if(strchr(pathname, '/') == NULL) {
+		return false;
+		}
 		command[count]= (char *)0;
 /*
  * TODO:
