@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/sh
 
 # first argument path to a directory, filesdir
 filesdir=$1 
