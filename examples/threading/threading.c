@@ -13,7 +13,23 @@ void* threadfunc(void* thread_param)
 
     // TODO: wait, obtain mutex, wait, release mutex as described by thread_data structure
     // hint: use a cast like the one below to obtain thread arguments from your parameter
-    //struct thread_data* thread_func_args = (struct thread_data *) thread_param;
+    struct thread_data* thread_func_args = (struct thread_data *) thread_param;
+    DEBUG_LOG("going to wait to obtain mutex %d\n", thread_func_args->wait_to_obtain_ms);
+    usleep(thread_func_args->wait_to_obtain_ms);
+    if(pthread_mutex_lock(thread_func_args->mutex)) {
+        ERROR_LOG("pthread mutex lock");
+        thread_func_args->thread_complete_success = false;
+        pthread_exit(thread_func_args);
+    }
+    DEBUG_LOG("going to wait to release mutex %d\n", thread_func_args->wait_to_obtain_ms);
+    usleep(thread_func_args->wait_to_release_ms);
+    if(pthread_mutex_unlock(thread_func_args->mutex)){
+        ERROR_LOG("pthread mutex lock");
+        thread_func_args->thread_complete_success = false;
+        pthread_exit(thread_func_args);
+    }
+    thread_func_args->thread_complete_success = true;
+    DEBUG_LOG("Done with the thread\n");
     return thread_param;
 }
 
@@ -28,6 +44,23 @@ bool start_thread_obtaining_mutex(pthread_t *thread, pthread_mutex_t *mutex,int 
      *
      * See implementation details in threading.h file comment block
      */
-    return false;
+    int ret = true;
+    // allocate memory for thread_data
+    struct thread_data *thread_param = malloc(sizeof(struct thread_data));
+    if(thread_param == NULL) {
+        ERROR_LOG("malloc failed");
+        return false;
+    }
+    // setup pthread_mutex
+    thread_param->mutex = mutex;
+    thread_param->wait_to_obtain_ms= wait_to_obtain_ms;
+    thread_param->wait_to_release_ms = wait_to_release_ms;
+    // create and start thread
+    ret = pthread_create(thread, NULL, threadfunc, (void*)thread_param);
+    if (ret) {
+        ERROR_LOG("pthread_create %d", ret);
+        return false;
+    }
+    return true;
 }
 
