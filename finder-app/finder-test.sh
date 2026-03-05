@@ -60,7 +60,7 @@ done
 OUTPUTSTRING=$(finder.sh "$WRITEDIR" "$WRITESTR")
 
 # remove temporary directories
-rm -rf "$WRITEDIR/assignment4-result.txt"
+#rm -rf "$WRITEDIR/assignment4-result.txt"
 
 set +e
 echo ${OUTPUTSTRING} | grep "${MATCHSTR}"
