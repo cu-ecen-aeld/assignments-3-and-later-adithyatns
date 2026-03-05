@@ -29,7 +29,7 @@ MATCHSTR="The number of files are ${NUMFILES} and the number of matching lines a
 
 echo "Writing ${NUMFILES} files containing string ${WRITESTR} to ${WRITEDIR}"
 
-rm -rf "${WRITEDIR}"
+rm -rf "${WRITEDIR}/*"
 
 # create $WRITEDIR if not assignment1
 assignment=`cat /etc/finder-app/conf/assignment.txt`
@@ -60,7 +60,7 @@ done
 OUTPUTSTRING=$(finder.sh "$WRITEDIR" "$WRITESTR")
 
 # remove temporary directories
-rm -rf /tmp
+rm -rf "$WRITEDIR/assignment4-result.txt"
 
 set +e
 echo ${OUTPUTSTRING} | grep "${MATCHSTR}"
